@@ -28,7 +28,7 @@ dotnet test
   - accounts should be unique, validated by email and phone number
 
 ```
-curl --location 'https://localhost:7273/api/Account/Create' \
+curl --location 'https://localhost:7273/api/account/create' \
 --header 'Content-Type: application/json' \
 --data-raw '{"name": "user name", "email": "user@email.com", "phoneNumber": "123123123", "password": "user123", "address": "User street 47"}'
 ```
@@ -36,7 +36,7 @@ curl --location 'https://localhost:7273/api/Account/Create' \
 - Users can login after they've created a new account (session cookie will be created with 1 hr TTL)
 
 ```
-curl --location 'https://localhost:7273/api/Account/Login' \
+curl --location 'https://localhost:7273/api/account/login' \
 --header 'Content-Type: application/json' \
 --data-raw '{"email": "user@email.com", "password": "user123"}'
 ```
@@ -44,7 +44,7 @@ curl --location 'https://localhost:7273/api/Account/Login' \
 - Users can logout after they've created a new account (session cookie TTL is set to zero)
 
 ```
-curl --location --request POST 'https://localhost:7273/api/Account/Logout' \
+curl --location --request POST 'https://localhost:7273/api/account/logout' \
 --header 'Cookie: AuthToken={{auth-cookie-value}}'
 ```
 
@@ -52,7 +52,7 @@ curl --location --request POST 'https://localhost:7273/api/Account/Logout' \
   - deactivated accounts can no longer login
 
 ```
-curl --location --request POST 'https://localhost:7273/api/Account/Deactivate' \
+curl --location --request POST 'https://localhost:7273/api/account/deactivate' \
 --header 'Cookie: AuthToken={{auth-cookie-value}}'
 ```
 
@@ -61,14 +61,14 @@ curl --location --request POST 'https://localhost:7273/api/Account/Deactivate' \
   - Check balance
 
 ```
-curl --location 'https://localhost:7273/api/Users/{{id}}/Balance' \
+curl --location 'https://localhost:7273/api/users/{{id}}/balance' \
 --header 'Cookie: AuthToken={{auth-cookie-value}}'
 ```
 
 - Check transaction history
 
 ```
-curl --location 'https://localhost:7273/api/Users/{{id}}/history' \
+curl --location 'https://localhost:7273/api/users/{{id}}/history' \
 --header 'Cookie: AuthToken={{auth-cookie-value}}'
 ```
 
@@ -77,7 +77,7 @@ curl --location 'https://localhost:7273/api/Users/{{id}}/history' \
   - Negative values protection is in place
 
 ```
-curl --location 'https://localhost:7273/api/Users/{{id}}/deposit' \
+curl --location 'https://localhost:7273/api/users/{{id}}/deposit' \
 --header 'Content-Type: application/json' \
 --header 'Cookie: AuthToken={{auth-cookie-value}}' \
 --data '{
@@ -90,7 +90,7 @@ curl --location 'https://localhost:7273/api/Users/{{id}}/deposit' \
   - Negative values protection is in place
 
 ```
-curl --location 'https://localhost:7273/api/Users/{{id}}/Withdraw' \
+curl --location 'https://localhost:7273/api/users/{{id}}/withdraw' \
 --header 'Content-Type: application/json' \
 --header 'Cookie: AuthToken={{auth-cookie-value}}' \
 --data '{
