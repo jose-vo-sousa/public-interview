@@ -23,7 +23,7 @@
         }
 
         [HttpPost]
-        [Route("Account/Create")]
+        [Route("account/create")]
         [ProducesResponseType(typeof(User), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
@@ -50,7 +50,7 @@
         }
 
         [HttpPost]
-        [Route("Account/Login")]
+        [Route("account/login")]
         [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status400BadRequest)]
@@ -105,7 +105,7 @@
 
         [Authorize]
         [HttpPost]
-        [Route("Account/Logout")]
+        [Route("account/logout")]
         [ProducesResponseType(typeof(void), StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
@@ -128,7 +128,7 @@
 
         [Authorize]
         [HttpPost]
-        [Route("Account/Deactivate")]
+        [Route("account/deactivate")]
         [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
@@ -165,7 +165,7 @@
 
         [Authorize]
         [HttpGet]
-        [Route("Users/{id}/Balance")]
+        [Route("users/{id}/balance")]
         [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
@@ -188,7 +188,7 @@
 
         [Authorize]
         [HttpGet]
-        [Route("Users/{id}/History")]
+        [Route("users/{id}/history")]
         [ProducesResponseType(typeof(IEnumerable<Transaction>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ForbidResult), StatusCodes.Status403Forbidden)]
@@ -210,7 +210,7 @@
 
         [Authorize]
         [HttpPost]
-        [Route("Users/{id}/Transfer")]
+        [Route("users/{id}/transfer")]
         [ProducesResponseType(typeof(Transaction), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ForbidResult), StatusCodes.Status403Forbidden)]
@@ -231,7 +231,7 @@
             if (IsSameAccountTransfer(messagePrefix, Id, transactionRequest))
                 return Conflict();
 
-            if (IsPositiveAmount(messagePrefix, transactionRequest.Amount))
+            if (!IsPositiveAmount(messagePrefix, transactionRequest.Amount))
                 return BadRequest();
 
             try
@@ -254,7 +254,7 @@
 
         [Authorize]
         [HttpPost]
-        [Route("Users/{id}/Deposit")]
+        [Route("users/{id}/deposit")]
         [ProducesResponseType(typeof(Transaction), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ForbidResult), StatusCodes.Status403Forbidden)]
@@ -271,7 +271,7 @@
             if (!HasValidOwnership(messagePrefix, user, Id))
                 return Forbid();
 
-            if (IsPositiveAmount(messagePrefix, depositRequest.Amount))
+            if (!IsPositiveAmount(messagePrefix, depositRequest.Amount))
                 return BadRequest();
 
             try
@@ -294,7 +294,7 @@
 
         [Authorize]
         [HttpPost]
-        [Route("Users/{id}/Withdraw")]
+        [Route("users/{id}/withdraw")]
         [ProducesResponseType(typeof(Transaction), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ForbidResult), StatusCodes.Status403Forbidden)]
@@ -311,7 +311,7 @@
             if (!HasValidOwnership(messagePrefix, user, Id))
                 return Forbid();
 
-            if (IsPositiveAmount(messagePrefix, withdrawRequest.Amount))
+            if (!IsPositiveAmount(messagePrefix, withdrawRequest.Amount))
                 return BadRequest();
 
             try
