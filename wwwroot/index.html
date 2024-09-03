@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiny Bank</title>
+</head>
+<body>
+    <h1>Tiny Bank</h1>
+
+    <h2>Login</h2>
+    <form id="loginForm">
+        <label for="email">Email:</label>
+        <input type="email" id="email" required value="admin@email.com">
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+    <p id="loginStatus"></p>
+
+    <h2>Create Account</h2>
+    <form id="newAccountForm">
+        <label for="na_name">Name:</label>
+        <input type="text" id="na_name" required value="user name">
+        <br>
+        <label for="na_email">Email:</label>
+        <input type="email" id="na_email" required value="user@email.com">
+        <br>
+        <label for="na_password">Password:</label>
+        <input type="password" id="na_password" required value="user">
+        <br>
+        <label for="na_phoneNumber">Phone Number:</label>
+        <input type="tel" id="na_phoneNumber" required value="123123123">
+        <br>
+        <label for="na_address">Address:</label>
+        <input type="text" id="na_address" required value="User street 47">
+        <br>
+        <button type="submit">Create</button>
+    </form>
+    <p id="newAccountStatus"></p>
+
+    <script>
+        document.getElementById('newAccountForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const na_email = document.getElementById('na_email').value;
+            const na_password = document.getElementById('na_password').value;
+            const na_name = document.getElementById('na_name').value;
+            const na_phoneNumber = document.getElementById('na_phoneNumber').value;
+            const na_address = document.getElementById('na_address').value;
+
+            fetch('/api/account/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: na_email,
+                    password: na_password,
+                    name: na_name,
+                    phoneNumber: na_phoneNumber,
+                    address: na_address
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+            })
+            .catch(error => {
+                document.getElementById('newAccountStatus').innerText = 'Account creation failed: ' + error.message;
+            });
+        });
+    </script>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            fetch('/api/account/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json(); // Parse the JSON response body
+                    } else {
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                })
+                .then(data => {
+                    // Now you can extract the user ID and other details from the response
+                    const userId = data.id;
+
+                    // Store user information in localStorage
+                    localStorage.setItem('userId', userId);
+
+                    // Redirect to a different page after successful login
+                    window.location.href = '/bank.html';
+                })
+                .catch(error => {
+                    document.getElementById('loginStatus').innerText = 'Login failed: ' + error.message;
+                });
+        });
+    </script>
+</body>
+</html>

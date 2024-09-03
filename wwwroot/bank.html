@@ -1,0 +1,282 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiny Bank</title>
+</head>
+<body>
+    <h1>Welcome to Tiny Bank</h1>
+
+    <div>
+        <h2>Check Balance</h2>
+        <button id="checkBalanceBtn">Check Balance</button>
+        <p id="balance"></p>
+    </div>
+
+    <div>
+        <h2>Transfer Money</h2>
+        <form id="transferForm">
+            <label for="toUserId">To User ID:</label>
+            <input type="text" id="toUserId" required>
+            <br>
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" required>
+            <br>
+            <label for="description">Description:</label>
+            <input type="text" id="description">
+            <br>
+            <button type="submit">Transfer</button>
+        </form>
+        <p id="transferStatus"></p>
+    </div>
+
+    <div>
+        <h2>Deposit</h2>
+        <form id="depositForm">
+            <label for="deposit_amount">Amount:</label>
+            <input type="number" id="deposit_amount" required>
+            <br>
+            <button type="submit">Deposit</button>
+        </form>
+        <p id="depositStatus"></p>
+    </div>
+
+    <div>
+        <h2>Withdraw</h2>
+        <form id="withdrawForm">
+            <label for="withdraw_amount">Amount:</label>
+            <input type="number" id="withdraw_amount" required>
+            <br>
+            <button type="submit">Withdraw</button>
+        </form>
+        <p id="withdrawStatus"></p>
+    </div>
+
+    <div>
+        <h2>Operation History</h2>
+        <button id="checkHistoryBtn">Check History</button>
+        <pre id="history"></pre>
+    </div>
+
+    <div>
+        <h2>Deactivate Account</h2>
+        <form id="deactivateForm">
+            <button type="submit">Deactivate Account</button>
+        </form>
+        <p id="deactivateStatus"></p>
+    </div>
+
+    <div>
+        <h2>Logout</h2>
+        <form id="logoutForm">
+            <button type="submit">Logout Account</button>
+        </form>
+        <p id="logoutStatus"></p>
+    </div>
+
+    <script>
+        const userId = localStorage.getItem('userId');
+
+        document.getElementById('checkBalanceBtn').addEventListener('click', function () {
+            fetch(`/api/users/${userId}/balance`, {
+                method: 'GET',
+                credentials: 'include' // Include cookies for authentication
+            })
+                .then(response => {
+                    if (response.status === 401) {
+                        return 'Unauthorized: Please log in.';
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    //alert(data.accountBalance)
+                    document.getElementById('balance').innerText = JSON.stringify(data.accountBalance) || data;
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('transferForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const toUserId = document.getElementById('toUserId').value;
+            const amount = document.getElementById('amount').value;
+            const description = document.getElementById('description').value;
+
+            fetch(`/api/users/${userId}/transfer`, {
+                method: 'POST',
+                credentials: 'include', // Include cookies for authentication
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    destinationAccount: toUserId,
+                    amount: parseFloat(amount),
+                    description: description
+                })
+            })
+                .then(response => {
+                    if (response.status === 403) {
+                        return 'Forbiden: Please check request.';
+                    }
+                    if (response.status === 409) {
+                        return 'Conflict: Please check accounts.';
+                    }
+                    if (response.status === 401) {
+                        return 'Unauthorized: Please log in.';
+                    }
+                    if (response.status === 400) {
+                        return response.text();
+                    }
+                    return 'Transfer successful!';
+                })
+                .then(data => {
+                    document.getElementById('transferStatus').innerText = data;
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('depositForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const deposit_amount = document.getElementById('deposit_amount').value;
+            const userId = localStorage.getItem('userId');
+
+            fetch(`/api/users/${userId}/deposit`, {
+                method: 'POST',
+                credentials: 'include', // Include cookies for authentication
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: parseFloat(deposit_amount)
+                })
+            })
+                .then(response => {
+                    if (response.status === 401) {
+                        return 'Unauthorized: Please log in.';
+                    }
+                    if (response.status === 400) {
+                        return response.text();
+                    }
+                    return 'Deposit successful!';
+                })
+                .then(data => {
+                    document.getElementById('depositStatus').innerText = data;
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('withdrawForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const withdraw_amount = document.getElementById('withdraw_amount').value;
+            const userId = localStorage.getItem('userId');
+
+            fetch(`/api/users/${userId}/Withdraw`, {
+                method: 'POST',
+                credentials: 'include', // Include cookies for authentication
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: parseFloat(withdraw_amount)
+                })
+            })
+                .then(response => {
+                    if (response.status === 401) {
+                        return 'Unauthorized: Please log in.';
+                    }
+                    if (response.status === 400) {
+                        return response.text();
+                    }
+                    return 'Withdraw successful!';
+                })
+                .then(data => {
+                    document.getElementById('withdrawStatus').innerText = data;
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('checkHistoryBtn').addEventListener('click', function () {
+            fetch(`/api/users/${userId}/history`, {
+                method: 'GET',
+                credentials: 'include' // Include cookies for authentication
+            })
+                .then(response => {
+                    if (response.status === 401) {
+                        return 'Unauthorized: Please log in.';
+                    }
+                    return response.json();
+                })
+                .then(data => {
+
+                    var arrObj = [];
+                    var obj = JSON.stringify(data, function (key, value) {
+                        arrObj.push(value);
+                    })
+
+                    document.getElementById('history').innerText = JSON.stringify(arrObj, null, 2) || data;
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('deactivateForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            fetch('/api/account/deactivate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return ; // Parse the JSON response body
+                    } else {
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                })
+                .then(data => {
+                    // Clear user information in localStorage
+                    localStorage.clear();
+
+                    // Redirect to a different page after successful login
+                    window.location.href = '/index.html';
+                })
+                .catch(error => {
+                    document.getElementById('deactivateStatus').innerText = 'Deactivate failed: ' + error.message;
+                });
+        });
+
+        document.getElementById('logoutForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            fetch('/api/account/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return; // Parse the JSON response body
+                    } else {
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                })
+                .then(data => {
+                    // Clear user information in localStorage
+                    localStorage.clear();
+
+                    // Redirect to a different page after successful login
+                    window.location.href = '/index.html';
+                })
+                .catch(error => {
+                    document.getElementById('logoutStatus').innerText = 'Logout failed: ' + error.message;
+                });
+        });
+
+    </script>
+</body>
+</html>
