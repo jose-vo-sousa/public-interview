@@ -3,6 +3,7 @@ using TinyBank2.Services;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
+using TinyBank2.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,8 @@ builder.WebHost.ConfigureKestrel(options =>
 
 // Add application services
 builder.Services.AddSingleton<IBankService, BankService>();
+builder.Services.AddSingleton<IUserRepository, UserRepository>();
+builder.Services.AddSingleton<ITransactionRepository, TransactionRepository>();
 
 // Build the app
 var app = builder.Build();

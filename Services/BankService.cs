@@ -2,60 +2,68 @@
 {
     using TinyBank2.Mappers;
     using TinyBank2.Model;
+    using TinyBank2.Repositories;
 
     public class BankService : IBankService
     {
         // Memory data for application to work
-        private readonly Dictionary<Guid, User> _users = new Dictionary<Guid, User>();
-        private readonly List<Transaction> _transactions = new List<Transaction>();
-
+        private readonly IUserRepository userRepository;
+        private readonly ITransactionRepository transactionRepository;
         private readonly ILogger<BankService> logger;
 
-        public BankService(ILogger<BankService> logger)
+        public BankService(
+            ILogger<BankService> logger,
+            IUserRepository userRepository,
+            ITransactionRepository transactionRepository)
         {
             this.logger = logger;
-            CreateDummyData();
+            this.userRepository = userRepository;
+            this.transactionRepository = transactionRepository;
         }
 
         public User? GetUserById(Guid id)
         {
-            _users.TryGetValue(id, out var user);
-            return user;
+            return this.userRepository.GetUserById(id);
         }
 
         public User? GetUserByEmail(string email)
         {
-            return _users.Values.FirstOrDefault(u => u.Email == email);
+            return this.userRepository.GetUserByEmail(email);
         }
 
         public bool DeactivateUser(Guid id)
         {
-            //_users.Remove(id);
+            var user = this.userRepository.GetUserById(id);
+            if (user != null && user.Active)
+            {
+                user.Active = false;
+                this.userRepository.UpdateUser(user);
+                return true;
+            }
 
-            _users[id].Active = false;
-            return true;
+            return false;
         }
 
-        public List<Transaction> GetTransactionHistory(Guid userId)
+        public IEnumerable<Transaction> GetTransactionHistory(Guid userId)
         {
-            return _transactions.Where(t => t.OriginAccount == userId || t.DestinationAccount == userId).ToList();
+            return this.transactionRepository.GetTransactionsByUserId(userId);
         }
 
         public User AuthenticateUser(string email, string password)
         {
-            var user = _users.Values.FirstOrDefault(u => u.Email == email && u.Password == password);
-            return user;
+            var user = this.userRepository.GetUserByEmail(email);
+            if (user != null && user.Password == password)
+                return user;
+
+            return null;
         }
 
         public User CreateUser(UserCreationRequest userCreationRequest)
         {
-            if (!_users.Values.Any(
-                u => u.Email == userCreationRequest.Email || 
-                u.PhoneNumber == userCreationRequest.PhoneNumber))
+            if (!this.userRepository.UserExists(userCreationRequest.Email, userCreationRequest.PhoneNumber))
             {
                 var user = userCreationRequest.ToUser();
-                _users[user.Id] = user;
-
+                this.userRepository.AddUser(user);
                 return user;
             }
 
@@ -77,6 +85,9 @@
             fromUser.AccountBalance -= transactionRequest.Amount;
             toUser.AccountBalance += transactionRequest.Amount;
 
+            this.userRepository.UpdateUser(toUser);
+            this.userRepository.UpdateUser(fromUser);
+
             var transaction = new Transaction
             {
                 Id = Guid.NewGuid(),
@@ -87,10 +98,7 @@
                 DestinationAccount = transactionRequest.DestinationAccount
             };
 
-            _transactions.Add(transaction);
-            fromUser.TransactionHistory.Add(transaction);
-            toUser.TransactionHistory.Add(transaction);
-
+            this.transactionRepository.AddTransaction(transaction);
             return transaction;
         }
 
@@ -99,6 +107,7 @@
             var userAccount = GetAccountByUserId(id);
 
             userAccount.AccountBalance += depositRequest.Amount;
+            this.userRepository.UpdateUser(userAccount);
 
             var transaction = new Transaction
             {
@@ -110,9 +119,7 @@
                 Description = "Deposit"
             };
 
-            _transactions.Add(transaction);
-            userAccount.TransactionHistory.Add(transaction);
-
+            this.transactionRepository.AddTransaction(transaction);
             return transaction;
         }
 
@@ -123,6 +130,7 @@
             ValidateAccountFunds(userAccount, withdrawRequest.Amount);
 
             userAccount.AccountBalance -= withdrawRequest.Amount;
+            this.userRepository.UpdateUser(userAccount);
 
             var transaction = new Transaction
             {
@@ -134,28 +142,8 @@
                 Description = "Withdraw"
             };
 
-            _transactions.Add(transaction);
-            userAccount.TransactionHistory.Add(transaction);
-
+            this.transactionRepository.AddTransaction(transaction);
             return transaction;
-        }
-
-        private void CreateDummyData()
-        {
-            var adminData = new User
-            {
-                AccountBalance = 999999,
-                Active = true,
-                Address = "Admin avenue 43",
-                Email = "admin@email.com",
-                Id = Guid.Parse("718b52e2-7051-4f3c-ab50-7d4104e20d0e"),
-                Name = "admin",
-                Password = "admin",
-                PhoneNumber = "1234567890",
-                TransactionHistory = new List<Transaction>()
-            };
-
-            _users[adminData.Id] = adminData;
         }
 
         private void LogWarning(string message)
@@ -175,7 +163,8 @@
                 throw new Exception($"Invalid User Id.");
             }
 
-            if (!_users.TryGetValue(id, out var user))
+            var user = this.userRepository.GetUserById(id);
+            if (user == null)
             {
                 this.LogWarning(accountDoesNotExistMessage);
                 throw new Exception("Account do not exist.");
@@ -187,13 +176,10 @@
         private void ValidateAccountFunds(User userAccount, double amount)
         {
             if (userAccount.AccountBalance >= amount)
-            {
                 return;
-            }
 
             var messagePrefix = $"{nameof(BankService)} > {nameof(ValidateAccountFunds)} >";
             var insufficientFundsMessage = $"{messagePrefix} Insufficient funds in the account with id '{userAccount.Id}'.";
-
 
             this.LogWarning(insufficientFundsMessage);
             throw new Exception("Insufficient funds.");

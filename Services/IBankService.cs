@@ -15,7 +15,7 @@
 
         public bool DeactivateUser(Guid id);
 
-        public List<Transaction> GetTransactionHistory(Guid userId);
+        public IEnumerable<Transaction> GetTransactionHistory(Guid userId);
 
         public Transaction TransferMoney(Guid fromUserId, TransactionRequest transactionRequest);
 

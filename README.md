@@ -101,10 +101,10 @@ curl --location 'https://localhost:7273/api/Users/{{id}}/Withdraw' \
   - Transfers from/to same account are protected
 
 ```
-curl --location 'https://localhost:7273/api/users/f96697bd-e36c-41f1-ab91-1e964751996d/transfer' \
+curl --location 'https://localhost:7273/api/users/{{id}}/transfer' \
 --header 'content-type: application/json' \
 --header 'cookie: AuthToken={{auth-cookie-value}}' \
---data '{"destinationAccount":"f96697bd-e36c-41f1-ab91-1e964751996d","amount":500,"description":"Transfer"}'
+--data '{"destinationAccount":"{{destionation-account-id}}","amount":500,"description":"Transfer"}'
 ```
 
 - Application is logging vast operations, providing useful information

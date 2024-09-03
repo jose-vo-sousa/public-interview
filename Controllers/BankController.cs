@@ -68,7 +68,7 @@
                     logMessage = $"{messagePrefix} Tried to login in a deactivated account. Email:{userLoginRequest.Email}.";
                     logger.Log(LogLevel.Warning, logMessage);
 
-                    return Forbid("User account is not active");
+                    return StatusCode(StatusCodes.Status403Forbidden);
                 }
 
                 var claims = new List<Claim>
@@ -100,7 +100,7 @@
             logMessage = $"{messagePrefix} Invalid credentials used.";
             logger.Log(LogLevel.Warning, logMessage);
 
-            return Unauthorized("Invalid email or password");
+            return StatusCode(StatusCodes.Status400BadRequest);
         }
 
         [Authorize]
