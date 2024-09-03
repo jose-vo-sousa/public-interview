@@ -27,9 +27,9 @@
         [ProducesResponseType(typeof(User), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CreateUser([FromBody]UserCreationRequest user)
+        public async Task<IActionResult> CreateUserAsync([FromBody]UserCreationRequest user)
         {
-            var messagePrefix = $"{nameof(BankController)} > {nameof(CreateUser)} >";
+            var messagePrefix = $"{nameof(BankController)} > {nameof(CreateUserAsync)} >";
 
             try
             {
@@ -55,9 +55,9 @@
         [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Login([FromBody]UserLoginRequest userLoginRequest)
+        public async Task<IActionResult> LoginAsync([FromBody]UserLoginRequest userLoginRequest)
         {
-            var messagePrefix = $"{nameof(BankController)} > {nameof(Login)} >";
+            var messagePrefix = $"{nameof(BankController)} > {nameof(LoginAsync)} >";
             var logMessage = string.Empty;
 
             var user = bankService.AuthenticateUser(userLoginRequest.Email, userLoginRequest.Password);
@@ -109,9 +109,9 @@
         [ProducesResponseType(typeof(void), StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> LogoutAsync()
         {
-            var messagePrefix = $"{nameof(BankController)} > {nameof(Logout)} >";
+            var messagePrefix = $"{nameof(BankController)} > {nameof(LogoutAsync)} >";
             var logMessage = string.Empty;
 
             var user = ValidateAuthAndGetUserInfo(messagePrefix);
@@ -133,9 +133,9 @@
         [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Deactivate()
+        public async Task<IActionResult> DeactivateAsync()
         {
-            var messagePrefix = $"{nameof(BankController)} > {nameof(Deactivate)} >";
+            var messagePrefix = $"{nameof(BankController)} > {nameof(DeactivateAsync)} >";
             var logMessage = string.Empty;
 
             var user = ValidateAuthAndGetUserInfo(messagePrefix);
@@ -166,15 +166,14 @@
         [Authorize]
         [HttpGet]
         [Route("users/{id}/balance")]
-        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(double), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BadRequestObjectResult), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ForbidResult), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetBalance([FromRoute] string Id)
+        public async Task<IActionResult> GetBalanceAsync([FromRoute] string Id)
         {
-            var messagePrefix = $"{nameof(BankController)} > {nameof(GetBalance)} >";
-            var logMessage = string.Empty;
+            var messagePrefix = $"{nameof(BankController)} > {nameof(GetBalanceAsync)} >";
 
             var user = ValidateAuthAndGetUserInfo(messagePrefix);
             if (user == null)
@@ -183,7 +182,7 @@
             if (!HasValidOwnership(messagePrefix, user, Id))
                 return Forbid();
 
-            return Ok(new { user.AccountBalance });
+            return Ok(user.AccountBalance);
         }
 
         [Authorize]
@@ -193,9 +192,9 @@
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ForbidResult), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetTransactionHistory([FromRoute] string Id)
+        public async Task<IActionResult> GetTransactionHistoryAsync([FromRoute] string Id)
         {
-            var messagePrefix = $"{nameof(BankController)} > {nameof(GetTransactionHistory)} >";
+            var messagePrefix = $"{nameof(BankController)} > {nameof(GetTransactionHistoryAsync)} >";
 
             var user = ValidateAuthAndGetUserInfo(messagePrefix);
             if (user == null)
@@ -216,9 +215,9 @@
         [ProducesResponseType(typeof(ForbidResult), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ForbidResult), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> TransferMoney([FromRoute] string Id, [FromBody] TransactionRequest transactionRequest)
+        public async Task<IActionResult> TransferMoneyAsync([FromRoute] string Id, [FromBody] TransactionRequest transactionRequest)
         {
-            var messagePrefix = $"{nameof(BankController)} > {nameof(TransferMoney)} >";
+            var messagePrefix = $"{nameof(BankController)} > {nameof(TransferMoneyAsync)} >";
             var logMessage = string.Empty;
 
             var user = ValidateAuthAndGetUserInfo(messagePrefix);
@@ -259,9 +258,9 @@
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ForbidResult), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DepositMoney([FromRoute] string Id, [FromBody] DepositRequest depositRequest)
+        public async Task<IActionResult> DepositMoneyAsync([FromRoute] string Id, [FromBody] DepositRequest depositRequest)
         {
-            var messagePrefix = $"{nameof(BankController)} > {nameof(DepositMoney)} >";
+            var messagePrefix = $"{nameof(BankController)} > {nameof(DepositMoneyAsync)} >";
             var logMessage = string.Empty;
 
             var user = ValidateAuthAndGetUserInfo(messagePrefix);
@@ -299,9 +298,9 @@
         [ProducesResponseType(typeof(UnauthorizedObjectResult), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ForbidResult), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> WithdrawMoney([FromRoute] string Id, [FromBody] WithdrawRequest withdrawRequest)
+        public async Task<IActionResult> WithdrawMoneyAsync([FromRoute] string Id, [FromBody] WithdrawRequest withdrawRequest)
         {
-            var messagePrefix = $"{nameof(BankController)} > {nameof(WithdrawMoney)} >";
+            var messagePrefix = $"{nameof(BankController)} > {nameof(WithdrawMoneyAsync)} >";
             var logMessage = string.Empty;
 
             var user = ValidateAuthAndGetUserInfo(messagePrefix);

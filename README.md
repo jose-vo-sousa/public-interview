@@ -5,9 +5,12 @@
 - Clone repository
 - Open powershell in the cloned repository
 - Run the project
-
 ```
 dotnet run --environment Development
+```
+- Execute Unit tests
+```
+dotnet test
 ```
 
 ## Application Swagger documentation
